@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "reunote",
+  "version": "1.0.0",
+  "identifier": "com.jinyanshao.reunote",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://127.0.0.1:5273",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "reunote",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 600,
+        "resizable": true,
+        "center": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "acceptFirstMouse": true,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob: inkasset: asset: http://inkasset.localhost https://asset.localhost; media-src 'self' data: blob: inkasset: http://inkasset.localhost; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost inkasset: http://inkasset.localhost data: blob:; worker-src 'self' blob:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "useLocalToolsDir": true,
+    "createUpdaterArtifacts": false,
+    "category": "Productivity",
+    "copyright": "reunote · MIT License",
+    "shortDescription": "本地优先的自由画布笔记本",
+    "longDescription": "reunote 是一款无需登录、完全本地存储的 macOS 笔记应用。支持 OneNote 式自由画布、压感手绘墨迹、富文本块、笔记本三级组织、全文搜索、双向链接、PDF 批注，并可接入任意 OpenAI 兼容的 AI 服务。",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns"
+    ],
+    "macOS": {
+      "bundleName": "reunote",
+      "signingIdentity": "-",
+      "minimumSystemVersion": "13.0",
+      "hardenedRuntime": true,
+      "entitlements": "Entitlements.plist",
+      "dmg": {
+        "windowSize": { "width": 660, "height": 420 },
+        "background": "./icons/dmg-background.png",
+        "appPosition": { "x": 180, "y": 210 },
+        "applicationFolderPosition": { "x": 480, "y": 210 }
+      }
+    }
+  }
+}
