@@ -1,163 +1,242 @@
 # reunote
 
-本地优先的 macOS 自由画布笔记本。**无需注册、无需登录、不联网同步**，所有笔记、附件和设置只保存在你自己的 Mac 上。
+> 中文说明：[README.zh-CN.md](README.zh-CN.md)
 
-参考了 OneNote 的自由画布、Notion 的块式富文本、Obsidian 的双向链接、GoodNotes 的手绘墨迹，把它们合成一个不需要账号的本地应用。
+A local-first infinite-canvas notebook for macOS. **No account, no login, no cloud
+sync** — every note, attachment and setting stays in a SQLite file on your own Mac.
 
----
+It borrows the free canvas from OneNote, block-based rich text from Notion,
+backlinks from Obsidian and pressure ink from GoodNotes, and puts them in one
+application that never asks you to sign in.
 
-## 安装
-
-1. 打开 `output/reunote-v1.0.0-macOS-universal.dmg`
-2. 把「reunote」拖到「应用程序」
-3. **首次打开**：在「应用程序」里 **右键点击 → 打开**，然后在弹窗里再点一次「打开」
-
-> 第 3 步是必要的：这个 App 使用 ad-hoc 签名（没有花钱买 Apple 开发者证书），
-> macOS 的 Gatekeeper 会拦截首次直接双击。右键打开一次之后，以后就能正常双击了。
->
-> 如果提示「已损坏，无法打开」，在终端执行一次：
-> ```bash
-> xattr -cr "/Applications/reunote.app"
-> ```
-
-支持 Apple Silicon 与 Intel（通用二进制），系统要求 macOS 13 及以上。
+- **Stack** — React 18 + TypeScript + Vite + Tailwind + TipTap in a Tauri 2
+  (Rust) shell, SQLite via rusqlite
+- **Size** — ~80 TypeScript modules and ~4,300 lines of Rust; 211 frontend tests
+  and 26 Rust tests run on every push
+- **Status** — v1.0.0, universal binary (Apple Silicon + Intel), macOS 13+
 
 ---
 
-## 功能
+## Install
 
-### 自由画布
-- 无限画布，任意位置放置内容；滚轮平移、`⌘`+滚轮（或触控板捏合）缩放
-- 元素类型：富文本块、便签、图片、图形、LaTeX 公式、代码块、文件附件、音频、PDF 页
-- 框选多选、拖动吸附与对齐参考线、层级前后、锁定、旋转
-- 撤销 / 重做 120 步
-- 页面背景可选方格 / 点阵 / 横线 / 窄横线 / 空白
+1. Open `output/reunote-v1.0.0-macOS-universal.dmg`
+2. Drag **reunote** into Applications
+3. **The first launch only:** right-click the app → **Open**, then confirm
+   **Open** in the dialog
 
-### 富文本
-- 标题、粗斜体下划线删除线、文字颜色、六色高亮、上下标
-- 无序 / 有序 / **待办清单**、引用、分割线、代码块（语法高亮）、表格、链接、图片
-- 输入 `/` 唤起块命令菜单；选中文字弹出浮动工具条
-- 支持 Markdown 快捷输入（`# `、`- `、`> `、` ``` ` 等）
+Step 3 is required. The build is ad-hoc signed — there is no paid Apple Developer
+certificate behind it — so Gatekeeper blocks a plain double-click the first time.
+After one right-click launch, double-clicking works as usual.
 
-### 手绘
-- 压感画笔（支持数位板 / Apple Pencil 转发；鼠标与触控板走模拟压感）
-- 荧光笔（正片叠底 / 滤色，浅色深色主题都正常）
-- 橡皮（整笔擦除）、套索选择墨迹
-- 墨迹以**矢量**存储，任意缩放都清晰
-- 深色模式下自动提亮接近黑色的墨迹（只影响显示，原始颜色不变）
-- 图形工具：矩形、椭圆、菱形、箭头、直线，可填充、虚线、加文字标签
+If macOS claims the app is damaged, clear the quarantine attribute once:
 
-### 组织与检索
-- 笔记本 → 分区 → 页面 三级结构，支持子页面
-- `#标签` 自动收集；`[[页面标题]]` 自动生成反向链接面板
-- `⌘K` 全库搜索，对中文友好（不依赖分词器，任意子串都能命中）
-- 收藏、最近打开、回收站（软删除，可恢复 / 彻底删除）
-- 每页最多保留 50 个版本快照，可随时回滚
+```bash
+xattr -cr "/Applications/reunote.app"
+```
 
-### 导入导出
-- 导出：Markdown、PNG 图片、PDF
-- 导入：Markdown / 文本文件、图片、任意文件附件
-- **PDF 批注**：导入 PDF 会逐页渲染成画布上的图片，直接用画笔在上面批注
-- 拖拽文件到窗口、`⌘V` 粘贴图片都可直接插入
-- 整库备份 `.jinyanbak`（含附件），一键恢复；恢复时兼容历史备份
+---
 
-### AI（可选，自带 Key）
-在「设置 → AI 服务」里填入 **接口地址 / API Key / 模型名**，即可使用。
+## What it does
 
-- 兼容 **OpenAI 协议**的任何服务：OpenAI、DeepSeek、通义千问、Kimi、智谱 GLM、
-  硅基流动、OpenRouter、Ollama（本地）、LM Studio（本地）…… 内置一键预设
-- 也支持 **Anthropic Messages** 协议
-- 可配置多组服务随时切换；支持拉取模型列表、连通性测试、温度 / 最大 tokens / 超时
+### Infinite canvas
 
-**文字操作**（选中文字后一键执行，结果可**直接替换原文**）
+- Place anything anywhere; scroll to pan, `⌘`+scroll (or trackpad pinch) to zoom
+- Element types: rich-text blocks, sticky notes, images, shapes, LaTeX formulas,
+  code blocks, file attachments, audio, PDF pages
+- Rubber-band selection, snapping with alignment guides, z-order, lock, rotate
+- 120 steps of undo / redo
+- Page backgrounds: grid, dots, ruled, narrow-ruled, blank
 
-| 分组 | 能力 |
+### Rich text
+
+- Headings, bold / italic / underline / strikethrough, text colour, six
+  highlights, super- and subscript
+- Bullet, numbered and **task** lists, quotes, rules, syntax-highlighted code
+  blocks, tables, links, images
+- `/` opens the block command menu; selecting text raises a floating toolbar
+- Markdown input shortcuts (`# `, `- `, `> `, ` ``` ` and friends)
+
+### Ink
+
+- Pressure pen (graphics tablet and Apple Pencil forwarding; mouse and trackpad
+  get simulated pressure)
+- Highlighter in multiply / screen blend, correct in both light and dark themes
+- Eraser (whole stroke) and lasso selection for ink
+- Strokes are stored as **vectors**, so they stay sharp at any zoom
+- In dark mode, near-black ink is lightened for display only — the stored colour
+  is untouched
+- Shape tools: rectangle, ellipse, diamond, arrow, line, with fill, dashes and
+  text labels
+
+### Organising and finding
+
+- Notebook → section → page, with nested sub-pages
+- `#tags` are collected automatically; `[[Page title]]` builds a backlinks panel
+- `⌘K` searches the whole library, and it is friendly to Chinese: no tokeniser,
+  any substring matches
+- Favourites, recently opened, and a trash that soft-deletes (restore or purge)
+- Up to 50 version snapshots per page, roll back at any time
+
+### Import and export
+
+- Export to Markdown, PNG or PDF
+- Import Markdown / text files, images, or any file as an attachment
+- **PDF annotation** — an imported PDF is rendered page by page onto the canvas,
+  so you can draw straight onto it
+- Drag files into the window or paste an image with `⌘V`
+- Whole-library backup to a `.jinyanbak` archive (attachments included) and
+  one-click restore, backwards compatible with older backups
+
+### AI (optional, bring your own key)
+
+Fill in **endpoint / API key / model** under Settings → AI service.
+
+- Works with any **OpenAI-compatible** service: OpenAI, DeepSeek, Qwen, Kimi,
+  Zhipu GLM, SiliconFlow, OpenRouter, Ollama (local), LM Studio (local) — with
+  one-click presets
+- Also speaks the **Anthropic Messages** protocol
+- Several services can be configured and switched; model lists, connectivity
+  tests, temperature, max tokens and timeout are all exposed
+
+**Text actions** — run on a selection, and the result can replace the original
+in place:
+
+| Group | Actions |
 | --- | --- |
-| 改写 | 润色、纠错、精简、扩写、更正式、更口语、学术化、改成要点、要点转段落、续写 |
-| 翻译 | 英 / 简中 / 繁中 / 日 / 韩 / 法 / 德 / 西 / 俄 / 葡 / 阿 / 泰，共 12 种语言 |
-| 分析 | 总结、解释、提关键词、提取待办、找问题、出题自测 |
-| 生成 | 生成大纲、整理成表格、拆成步骤、起标题 |
+| Rewrite | polish, fix errors, shorten, expand, more formal, more casual, academic, to bullets, bullets to prose, continue |
+| Translate | English, Simplified / Traditional Chinese, Japanese, Korean, French, German, Spanish, Russian, Portuguese, Arabic, Thai |
+| Analyse | summarise, explain, keywords, extract to-dos, find problems, generate quiz questions |
+| Generate | outline, table, step-by-step breakdown, title |
 
-在文本块里选中文字时，浮动工具条右侧也有 ✨ 按钮，可直接就地改写或翻译。
+The floating toolbar in a text block has a ✨ button for the same rewrites and
+translations without leaving the block.
 
-**画布级 AI**（结果直接落到画布上，可撤销）
+**Canvas-level AI** — results land on the canvas and are undoable:
 
-- **一键整理** —— 纯本地，把散落的元素重排成整齐的列
-- **AI 智能布局** —— 让模型按主题给元素分组，自动排成带小标题的分栏
-- **生成思维导图** —— 根据本页内容生成节点树，画成带连线的图形
-- **拆成便签墙** —— 把内容拆成若干张彩色便签铺开
-- **整理成文章** —— 把零散笔记整理成完整成稿，写入新页面
-- **整页翻译** —— 整页译成目标语言并生成新页面
+- **Tidy up** — fully local, reflows scattered elements into neat columns
+- **Smart layout** — the model groups elements by topic into labelled columns
+- **Mind map** — builds a node tree from the page and draws it with connectors
+- **Sticky wall** — splits the content into coloured sticky notes
+- **Write it up** — turns loose notes into a finished piece on a new page
+- **Translate page** — renders the whole page into a target language on a new page
 
-**其他**
+**Also**
 
-- 侧边栏对话（流式输出，支持显示思维链），上下文范围可选 **本页 / 本分区 / 本笔记本**
-- **手写 / 图片文字识别**：用套索选中笔迹、或选中图片 / PDF 页，点「识别文字」，
-  用你配置的多模态模型转成可编辑文本（需在设置里勾选「该模型支持读图」）
-- 新页面可根据内容自动生成标题（可在设置里关闭）
+- Side-panel chat with streaming output and optional chain-of-thought display;
+  context scope can be the page, the section or the notebook
+- **Handwriting / image OCR** — lasso ink, or select an image or PDF page, and
+  "Recognise text" converts it with your configured multimodal model (tick
+  "this model can read images" in settings)
+- New pages can title themselves from their content (switchable)
 
-> **关于隐私**：API Key 只写入本机的 SQLite 数据库。请求由 App 的 Rust 层直接发往
-> 你填写的那个地址，不经过任何第三方中转。不配置 AI 时，App 完全不联网。
+> **On privacy:** the API key is written to the local SQLite database only.
+> Requests go from the app's Rust layer straight to the endpoint you entered,
+> through no third party. With no AI configured, the app makes no network
+> requests at all.
 
 ---
 
-## 快捷键
+## Shortcuts
 
-| 操作 | 快捷键 |
+| Action | Keys |
 | --- | --- |
-| 选择 / 抓手 / 文本 / 便签 | `V` / `H` / `T` / `N` |
-| 画笔 / 荧光笔 / 橡皮 / 套索 | `P` / `M` / `E` / `L` |
-| 矩形 / 椭圆 / 箭头 | `R` / `O` / `A` |
-| 平移画布 | 按住 `空格` 拖动，或双指滑动 |
-| 缩放 | `⌘` + 滚轮 / 捏合，`⌘=` `⌘-` `⌘0` `⌘9` |
-| 撤销 / 重做 | `⌘Z` / `⇧⌘Z` |
-| 全选 / 复制元素 / 删除 | `⌘A` / `⌘D` / `⌫` |
-| 微调位置 | 方向键（按 `⇧` 为 10px） |
-| 全局搜索 / AI 助手 / 边栏 | `⌘K` / `⌘J` / `⌘\` |
-| 新建页面 / 新建分区 | `⌘N` / `⇧⌘N` |
-| 保存 / 导出 Markdown | `⌘S` / `⇧⌘E` |
+| Select / hand / text / sticky | `V` / `H` / `T` / `N` |
+| Pen / highlighter / eraser / lasso | `P` / `M` / `E` / `L` |
+| Rectangle / ellipse / arrow | `R` / `O` / `A` |
+| Pan | hold `space` and drag, or two-finger swipe |
+| Zoom | `⌘` + scroll / pinch, `⌘=` `⌘-` `⌘0` `⌘9` |
+| Undo / redo | `⌘Z` / `⇧⌘Z` |
+| Select all / duplicate / delete | `⌘A` / `⌘D` / `⌫` |
+| Nudge | arrow keys (`⇧` for 10px) |
+| Search / AI / sidebar | `⌘K` / `⌘J` / `⌘\` |
+| New page / new section | `⌘N` / `⇧⌘N` |
+| Save / export Markdown | `⌘S` / `⇧⌘E` |
 
-App 内「帮助 → 键盘快捷键」有完整列表。
+Help → Keyboard shortcuts has the full list.
 
 ---
 
-## 数据存放位置
+## Where the data lives
 
 ```
 ~/Library/Application Support/com.jinyanshao.reunote/
-├── reunote.db               笔记、结构、标签、版本、设置（SQLite）
-└── attachments/       图片、PDF 渲染页、文件附件
+├── reunote.db         notes, structure, tags, versions, settings (SQLite)
+└── attachments/       images, rendered PDF pages, file attachments
 ```
 
-「设置 → 数据与备份」里可以看到统计并一键备份；菜单「帮助 → 打开数据文件夹」可直接跳转。
+Settings → Data and backup shows the statistics and takes a backup; Help → Open
+data folder jumps straight there.
 
 ---
 
-## 自己重新构建
+## Building it yourself
 
-双击 **`Build reunote.command`**。脚本会：
+Double-click **`Build reunote.command`**. The script:
 
-1. 检查 Xcode 命令行工具和 Node 20+
-2. 把 Rust 工具链装在项目内的 `.build-tools/`（不污染系统）
-3. 安装前端依赖、生成图标
-4. 构建 `aarch64` + `x86_64` 通用二进制并打包 DMG 到 `output/`
+1. checks for the Xcode command line tools and Node 20+
+2. installs the Rust toolchain inside the project at `.build-tools/`, leaving the
+   system alone
+3. installs frontend dependencies and generates the icons
+4. builds the `aarch64` + `x86_64` universal binary and packages a DMG into
+   `output/`
 
-也可以手动：
+By hand:
 
 ```bash
 npm install
 npx tauri build --target universal-apple-darwin
 ```
 
-## 技术栈
+## Development
 
-- **前端**：React 18 + TypeScript + Vite + Tailwind CSS + TipTap（ProseMirror）
-- **墨迹**：perfect-freehand 变宽笔迹 → SVG 路径
-- **公式**：KaTeX　**PDF**：pdf.js　**Markdown**：marked / turndown
-- **外壳**：Tauri 2（Rust）+ WKWebView
-- **存储**：SQLite（rusqlite，bundled）
-- **AI 转发**：reqwest + SSE 流式，通过 Tauri Channel 回传前端
+```bash
+npm install
+npm run dev          # Vite dev server on 127.0.0.1:5273
+npm run app:dev      # the Tauri shell against that server
+npm test             # vitest, 211 tests
+npm run typecheck    # tsc --noEmit
+```
 
-## 许可
+The Rust side lives in `src-tauri/`:
+
+```bash
+cd src-tauri && cargo test
+```
+
+CI (`.github/workflows/ci.yml`) runs the typecheck, the frontend tests and a
+production build on every push and pull request, and the Rust tests on macOS.
+
+## Architecture
+
+```
+src/
+├── components/        React views — canvas, editor, sidebar, dialogs
+│   ├── canvas/        stage, element views, toolbars, agent preview overlay
+│   ├── editor/        TipTap rich text and the slash menu
+│   └── ai/            the AI side panel
+├── lib/               state and logic, no JSX
+│   ├── store.ts       zustand store: notebooks, pages, elements, undo
+│   ├── agent/         AI session, canvas tools, layout skills
+│   ├── ink.ts         perfect-freehand strokes → SVG paths
+│   ├── pageFind.ts    substring search that works on Chinese
+│   └── api.ts         the typed bridge to the Rust commands
+└── main.tsx
+
+src-tauri/src/
+├── commands.rs        every Tauri command the frontend can call
+├── db.rs              SQLite schema and migrations
+├── ai.rs              AI forwarding, SSE streaming over a Tauri channel
+├── files.rs           attachment storage
+└── models.rs          the shared data types
+```
+
+- **Ink** — perfect-freehand produces variable-width outlines, stored as vector
+  paths rather than bitmaps
+- **Formulas** — KaTeX  **PDF** — pdf.js  **Markdown** — marked / turndown
+- **Storage** — SQLite (rusqlite, bundled), so the library is one portable file
+- **AI forwarding** — reqwest with SSE streamed back to the frontend over a
+  Tauri channel, which keeps keys and endpoints out of the WebView
+
+## Licence
 
 MIT
